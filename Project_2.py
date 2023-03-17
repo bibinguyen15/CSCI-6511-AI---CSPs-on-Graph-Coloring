@@ -2,7 +2,7 @@ import copy
 
 
 def main():
-    data = readFile("TestCases\\test6.txt")
+    data = readFile("TestCases\\test5.txt")
     result = graphColoring(data)
 
 
@@ -24,7 +24,8 @@ def readFile(file):
                 line = line[0:-1]
             edges.append(line.split(","))
 
-        print("---Problem:", colors, "- Edges:", edges)
+        print("---Problem: can be solved in", colors, "?")
+        #print("---Problem:", colors, "- Edges:", edges)
         return [colors, edges]
 
 
@@ -56,6 +57,7 @@ def graphColoring(data):
     if result == None:
         print("No solutions")
     else:
+        print("The solution is:")
         print(result)
 
 
@@ -77,7 +79,7 @@ class CSP:
         selected = self.selectNode()
 
         orderedColors = self.orderColor(selected)
-        print("Ordered colors is:", orderedColors)
+        #print("Ordered colors is:", orderedColors)
 
         for color in orderedColors:
             if self.consistent(selected, color, assignment):
@@ -88,7 +90,7 @@ class CSP:
                 assign = assignment.copy()
                 assign[selected] = color
                 self.graph[selected][0] = [color]
-                print("Assigning", selected, "with", color)
+                #print("Assigning", selected, "with", color)
 
                 print(assign)
 
@@ -114,10 +116,19 @@ class CSP:
                     self.graph[neighbor][0].remove(
                         self.graph[selected][0][0])
                 if not self.graph[neighbor][0]:
-                    print(neighbor, "has empty domain")
+                    print(neighbor, "has empty domain by forward checking")
                     return False
+                if len(self.graph[neighbor][0]) == 1:
+                    for x in self.graph[neighbor][1]:
+                        if x not in self.visited:
+                            if self.graph[neighbor][0][0] in self.graph[x][0]:
+                                self.graph[x][0].remove(
+                                    self.graph[neighbor][0][0])
+                            if not self.graph[x][0]:
+                                print(x, "has empty domain by ac3")
+                                return False
 
-        self.printGraph()
+        # self.printGraph()
         return True
 
     def consistent(self, selected, color, assignment):
@@ -135,7 +146,7 @@ class CSP:
                for k, v in self.graph.items() if len(v[0]) == minDomain and k not in self.visited]
 
         mcv.sort(key=lambda elem: len(elem[1]), reverse=True)
-        print("Selected node is:", mcv[0][0], "from", mcv)
+        #print("Selected node is:", mcv[0][0], "from", mcv)
         return mcv[0][0]
 
     def orderColor(self, node):
@@ -154,7 +165,19 @@ class CSP:
 
 
 '''
-    
+    def ac3(self, selected):
+        # For now only do simple forward checking
+        for neighbor in self.graph[selected][1]:
+            if neighbor not in self.visited:
+                if self.graph[selected][0][0] in self.graph[neighbor][0]:
+                    self.graph[neighbor][0].remove(
+                        self.graph[selected][0][0])
+                if not self.graph[neighbor][0]:
+                    print(neighbor, "has empty domain")
+                    return False
+
+        # self.printGraph()
+        return True    
     
     
     
