@@ -2,7 +2,7 @@ import copy
 
 
 def main():
-    data = readFile("TestCases\\test5.txt")
+    data = readFile("TestCases\\testMega.txt")
     result = graphColoring(data)
 
 
@@ -37,6 +37,7 @@ def graphColoring(data):
     graph = {}
     # processing each edges
     for edge in edges:
+        print(edge)
         if edge[0] not in nodes:
             nodes.append(edge[0])
             # value is color, domain, then neighbors
@@ -51,21 +52,23 @@ def graphColoring(data):
 
     print(graph)
 
-    csp = CSP(nodes, graph, colors)
+    csp = CSP(nodes, graph, edges)
 
     result = csp.solve()
     if result == None:
         print("No solutions")
+        return False
     else:
         print("The solution is:")
         print(result)
+        return result
 
 
 class CSP:
-    def __init__(self, nodes, graph, colors):
+    def __init__(self, nodes, graph, edges):
         self.nodes = nodes
         self.graph = graph
-        self.colors = colors
+        self.edges = edges
         self.visited = []
 
     def printGraph(self):
@@ -109,24 +112,21 @@ class CSP:
         return None
 
     def ac3(self, selected):
-        # For now only do simple forward checking
         for neighbor in self.graph[selected][1]:
+            recheck = True
             if neighbor not in self.visited:
+                if len(self.graph[neighbor][0]) == 1:
+                    recheck = False
                 if self.graph[selected][0][0] in self.graph[neighbor][0]:
                     self.graph[neighbor][0].remove(
                         self.graph[selected][0][0])
                 if not self.graph[neighbor][0]:
                     print(neighbor, "has empty domain by forward checking")
                     return False
-                if len(self.graph[neighbor][0]) == 1:
-                    for x in self.graph[neighbor][1]:
-                        if x not in self.visited:
-                            if self.graph[neighbor][0][0] in self.graph[x][0]:
-                                self.graph[x][0].remove(
-                                    self.graph[neighbor][0][0])
-                            if not self.graph[x][0]:
-                                print(x, "has empty domain by ac3")
-                                return False
+                if len(self.graph[neighbor][0]) == 1 and recheck:
+                    print("Node", neighbor, "now has",
+                          self.graph[neighbor][0])
+                    return self.ac3(neighbor)
 
         # self.printGraph()
         return True
@@ -179,7 +179,28 @@ class CSP:
         # self.printGraph()
         return True    
     
-    
+    def ac3(self, selected):
+        # For now only do simple forward checking
+        for neighbor in self.graph[selected][1]:
+            if neighbor not in self.visited:
+                if self.graph[selected][0][0] in self.graph[neighbor][0]:
+                    self.graph[neighbor][0].remove(
+                        self.graph[selected][0][0])
+                if not self.graph[neighbor][0]:
+                    print(neighbor, "has empty domain by forward checking")
+                    return False
+                if len(self.graph[neighbor][0]) == 1:
+                    for x in self.graph[neighbor][1]:
+                        if x not in self.visited:
+                            if self.graph[neighbor][0][0] in self.graph[x][0]:
+                                self.graph[x][0].remove(
+                                    self.graph[neighbor][0][0])
+                            if not self.graph[x][0]:
+                                print(x, "has empty domain by ac3")
+                                return False
+
+        # self.printGraph()
+        return True    
     
     
     
