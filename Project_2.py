@@ -2,7 +2,7 @@ import copy
 
 
 def main():
-    data = readFile("TestCases\\testMega.txt")
+    data = readFile("TestCases\\test4.txt")
     result = graphColoring(data)
 
 
